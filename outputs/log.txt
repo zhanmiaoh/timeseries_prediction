@@ -1,0 +1,85 @@
+[2026-03-13 01:09:05.083542] 
+Using device: cpu
+Raw data shape: (2516, 5)
+
+Features: ['Open', 'High', 'Low', 'Close', 'Volume', 'return', 'log_return']
+Target: Close Target index in features: 3
+
+After engineering features:
+(2515, 7)
+              Open    High     Low   Close      Volume    return  log_return
+Date                                                                        
+2015-01-05  108.29  108.65  105.41  106.25  61065973.0 -0.028172   -0.028576
+2015-01-06  106.54  107.43  104.63  106.26  65565949.0  0.000094    0.000094
+2015-01-07  107.20  108.20  106.69  107.75  39723689.0  0.014022    0.013925
+2015-01-08  109.23  112.15  108.70  111.87  58761565.0  0.038237    0.037524
+2015-01-09  112.67  113.25  110.21  112.01  53452528.0  0.001251    0.001251
+index type: <class 'pandas.core.indexes.datetimes.DatetimeIndex'> index dtype: datetime64[ns]
+index min/max: 2015-01-05 00:00:00 2024-12-31 00:00:00
+
+Final train/val/test shapes:
+Train data: (1510, 7) 2015-01-05 00:00:00 2020-12-31 00:00:00
+Val data: (503, 7) 2021-01-04 00:00:00 2022-12-30 00:00:00
+Test data: (501, 7) 2023-01-04 00:00:00 2024-12-31 00:00:00
+
+---Creating datasets...---
+Number of sliding-window samples:  Train: 1450, Test: 441, Val: 443
+
+---Baseline Model Evaluation on Test Set (scaled)---
+Naive Forecast - MAE: 0.0261, RMSE: 0.0356
+Moving Average - MAE: 0.0432, RMSE: 0.0550
+Linear Regression - MAE: 0.0705, RMSE: 0.0939
+
+---Training LSTM model...---
+Epoch 1/20 | Train loss: 0.5255 | Val Loss: 0.2278
+Epoch 2/20 | Train loss: 0.0944 | Val Loss: 0.0930
+Epoch 3/20 | Train loss: 0.0494 | Val Loss: 0.0412
+Epoch 4/20 | Train loss: 0.0313 | Val Loss: 0.0074
+Epoch 5/20 | Train loss: 0.0286 | Val Loss: 0.0047
+Epoch 6/20 | Train loss: 0.0255 | Val Loss: 0.0039
+Epoch 7/20 | Train loss: 0.0269 | Val Loss: 0.0033
+Epoch 8/20 | Train loss: 0.0230 | Val Loss: 0.0028
+Epoch 9/20 | Train loss: 0.0223 | Val Loss: 0.0031
+Epoch 10/20 | Train loss: 0.0228 | Val Loss: 0.0023
+Epoch 11/20 | Train loss: 0.0233 | Val Loss: 0.0023
+Epoch 12/20 | Train loss: 0.0233 | Val Loss: 0.0032
+Epoch 13/20 | Train loss: 0.0222 | Val Loss: 0.0023
+Epoch 14/20 | Train loss: 0.0221 | Val Loss: 0.0025
+Epoch 15/20 | Train loss: 0.0227 | Val Loss: 0.0024
+Early stopping at epoch 15. Best Val Loss: 0.002273
+LSTM Model - (scaled) MAE: 0.0490, RMSE: 0.0619
+
+---Training Transformer model...---
+Epoch 1/20 | Train loss: 0.2510 | Val Loss: 0.0342
+Epoch 2/20 | Train loss: 0.0475 | Val Loss: 0.0279
+Epoch 3/20 | Train loss: 0.0353 | Val Loss: 0.0109
+Epoch 4/20 | Train loss: 0.0310 | Val Loss: 0.0059
+Epoch 5/20 | Train loss: 0.0313 | Val Loss: 0.0085
+Epoch 6/20 | Train loss: 0.0280 | Val Loss: 0.0043
+Epoch 7/20 | Train loss: 0.0294 | Val Loss: 0.0053
+Epoch 8/20 | Train loss: 0.0270 | Val Loss: 0.0170
+Epoch 9/20 | Train loss: 0.0297 | Val Loss: 0.0031
+Epoch 10/20 | Train loss: 0.0261 | Val Loss: 0.0045
+Epoch 11/20 | Train loss: 0.0250 | Val Loss: 0.0031
+Epoch 12/20 | Train loss: 0.0249 | Val Loss: 0.0026
+Epoch 13/20 | Train loss: 0.0233 | Val Loss: 0.0048
+Epoch 14/20 | Train loss: 0.0231 | Val Loss: 0.0026
+Epoch 15/20 | Train loss: 0.0230 | Val Loss: 0.0029
+Epoch 16/20 | Train loss: 0.0222 | Val Loss: 0.0101
+Epoch 17/20 | Train loss: 0.0230 | Val Loss: 0.0025
+Epoch 18/20 | Train loss: 0.0228 | Val Loss: 0.0039
+Epoch 19/20 | Train loss: 0.0250 | Val Loss: 0.0032
+Epoch 20/20 | Train loss: 0.0251 | Val Loss: 0.0089
+Transformer Model - (scaled) MAE: 0.0449, RMSE: 0.0593
+
+---Final Results Summary (on raw data scale)---
+=================================================================
+Model                MAE             RMSE            MAPE           
+-----------------------------------------------------------------
+Naive Baseline       1.9045          2.6003          0.9735%        
+Moving Average       3.1543          4.0174          1.6129%        
+Linear Regression    5.1490          6.8565          2.5839%        
+LSTM                 3.5766          4.5197          1.7755%        
+Transformer          3.2788          4.3281          1.6986%        
+=================================================================
+Total test dates: (501, 1), Seq_length=60, Horizon=1, Pred dates: (441, 1)

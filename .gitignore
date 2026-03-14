@@ -1,0 +1,24 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+
+# outputs/
+data/raw/
+data/processed/
+
+# *.pth
+# *.pt
+# *.ckpt
+
+notebooks/0-repo.ipynb
+notebooks/all_code.py
+notebooks/demo4.1-supp_notes.ipynb
+notebooks/demo4.2-practice.ipynb
+notebooks/demo4.2-practice.pdf
+
+supp.ipynb
+
+.venv/
+venv/
+env/
