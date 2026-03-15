@@ -6,6 +6,8 @@ This project implements a time-series forecasting pipeline for stock price predi
 The current implementation (v1.0) serves as a foundational time series forecasting framework covering data preprocessing, dataset construction, model training, and evaluation. 
 
 This project is currently a forecasting benchmark, not a production trading system. Forecasting accuracy does not directly imply trading profitability. 
+
+(A related demo for time series prediction: https://github.com/zhanmiaoh/demo_timeseries_prediction)
 <!-- 
 Future work to be done: rigorous ablation study, predict on return or direction. 
 -->
