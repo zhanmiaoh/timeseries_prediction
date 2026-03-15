@@ -18,5 +18,20 @@
         "log_return"
     ],
     "target": "Close",
-    "seed": 10
+    "seed": 27,
+    "lstm_params": {
+        "num_features": 7,
+        "hidden_size": 64,
+        "num_layers": 2,
+        "dropout": 0.2,
+        "horizon": 1
+    },
+    "transformer_params": {
+        "num_features": 7,
+        "d_model": 64,
+        "nhead": 4,
+        "num_layers": 2,
+        "dropout": 0.1,
+        "horizon": 1
+    }
 }

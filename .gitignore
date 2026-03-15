@@ -3,9 +3,11 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 
-# outputs/
 data/raw/
 data/processed/
+
+outputs/*
+!outputs/20260315_180055
 
 # *.pth
 # *.pt

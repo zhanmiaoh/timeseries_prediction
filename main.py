@@ -41,7 +41,7 @@ def main():
     print(f"[{datetime.now().strftime('%Y%m%d_%H%M%S')}]" ,f"\nUsing device: {device}\n")
 
     # Set seed
-    seed = 10
+    seed = 27
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed) if torch.cuda.is_available() else None
@@ -111,13 +111,21 @@ def main():
 
     print("\n---Training LSTM model...---")
     # create model
-    lstm_model = LSTMModel(
-        num_features=len(features), 
-        hidden_size=64, 
-        num_layers=2, 
-        dropout=0.2, 
-        horizon=HORIZON
-    )
+    lstm_params = {
+        "num_features": len(features), 
+        "hidden_size": 64, 
+        "num_layers": 2, 
+        "dropout": 0.2, 
+        "horizon": HORIZON
+    }
+    lstm_model = LSTMModel(**lstm_params)
+    # lstm_model = LSTMModel(
+    #     num_features=len(features), 
+    #     hidden_size=64, 
+    #     num_layers=2, 
+    #     dropout=0.2, 
+    #     horizon=HORIZON
+    # )
 
     # create optimizer and loss function
     lstm_optimizer = torch.optim.Adam(lstm_model.parameters(), lr=LR)
@@ -133,14 +141,23 @@ def main():
 
     print("\n---Training Transformer model...---")
     # create model
-    transformer_model = TransformerForecast(
-        num_features=len(features), 
-        d_model=64, 
-        nhead=4, 
-        num_layers=2, 
-        dropout=0.1, 
-        horizon=HORIZON
-    )
+    transformer_params = {
+        "num_features": len(features), 
+        "d_model": 64, 
+        "nhead": 4, 
+        "num_layers": 2, 
+        "dropout": 0.1, 
+        "horizon": HORIZON
+    }
+    transformer_model = TransformerForecast(**transformer_params)
+    # transformer_model = TransformerForecast(
+    #     num_features=len(features), 
+    #     d_model=64, 
+    #     nhead=4, 
+    #     num_layers=2, 
+    #     dropout=0.1, 
+    #     horizon=HORIZON
+    # )
 
     # create optimizer and criterion
     transformer_optimizer = torch.optim.Adam(transformer_model.parameters(), lr=LR)
@@ -178,7 +195,10 @@ def main():
         "lr": LR,
         "features": features,
         "target": target,
-        "seed": seed
+        "seed": seed,
+            # model params
+        "lstm_params": lstm_params,
+        "transformer_params": transformer_params,
     }
 
 
@@ -204,13 +224,22 @@ def main():
                               transformer_model, transformer_history, transformer_optimizer, 
                               scaler, target_scaler)
 
-    # replace by priting summary_df
+    
+    # print("\n---Final Results Summary (on raw data scale)---")
+    # print("=" * 65)
+    # print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'MAPE':<15}")
+    # print("-" * 65)
+    # for label, preds in prediction_dict_raw.items():
+    #     print(f"{label:<20} {mae(y_test_raw, preds):<15.4f} {rmse(y_test_raw, preds):<15.4f} {f'{mape(y_test_raw, preds):.4f}%':<15}")
+    # print("=" * 65)
+    
     print("\n---Final Results Summary (on raw data scale)---")
     print("=" * 65)
     print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'MAPE':<15}")
     print("-" * 65)
-    for label, preds in prediction_dict_raw.items():
-        print(f"{label:<20} {mae(y_test_raw, preds):<15.4f} {rmse(y_test_raw, preds):<15.4f} {f'{mape(y_test_raw, preds):.4f}%':<15}")
+    for index, row in summary_df.iterrows():
+        mape = row['mape_raw']
+        print(f"{row['model']:<20} {row['mae_raw']:<15.4f} {row['rmse_raw']:<15.4f} {f'{mape:.4f}%':<15}")
     print("=" * 65)
 
     # log_file.close()

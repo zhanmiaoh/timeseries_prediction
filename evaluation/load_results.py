@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import json
 import joblib
 
 
@@ -13,6 +14,19 @@ import joblib
 
 run_dir = "outputs/20260314_002451"
 
+# config
+config_path = f"{run_dir}/config.json"
+with open(config_path, "r", encoding="utf-8") as f:
+    config = json.load(f)
+
+print(f"Load config, ticker: {config.get('ticker')}")
+
+
+# summary_df
+summary_df = pd.read_csv(f"{run_dir}/summary_metrics.csv")
+print(summary_df.head())
+
+
 
 # predictions and y_test
 data = np.load(f"{run_dir}/predictions.npz")
@@ -22,6 +36,7 @@ prediction_dict_raw = {}
 for key in data.files:
     if key.startswith(("Naive Baseline", "Moving Average", "Linear Regression", "LSTM", "Transformer")):
         prediction_dict_raw[key] = data[key]
+
 
 # training history (read csv back to dict: history_lstm, history_transformer)
 df = pd.read_csv(f"{run_dir}/history_lstm.csv")
@@ -43,10 +58,39 @@ history_transformer = {
 }
 
 
-# checkpoints
-
-
 # scaler
 targer_scaler = joblib.load(f"{run_dir}/target_scaler.joblib")
 feature_scaler = joblib.load(f"{run_dir}/feature_scaler.joblib")
 
+
+
+# checkpoints
+import torch
+from models.lstm import LSTMModel
+from models.transformer import TransformerForecast
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# load LSTM
+# load checkpoint into device (cpu/cuda)
+ckpt_path = f"{run_dir}/lstm_best.pt"
+lstm_ckpt = torch.load(ckpt_path, map_location=torch.device(device))
+
+# create object
+saved_config = lstm_ckpt.get("config", {}) 
+lstm_params = saved_config.get("lstm_params", {})
+lstm_model = LSTMModel(**lstm_params)
+
+# load state dict into model
+lstm_model.load_state_dict(lstm_ckpt["model_state_dict"])
+
+
+# load transformer
+ckpt_path = f"{run_dir}/transformer_best.pt"
+transformer_ckpt = torch.load(ckpt_path, map_location=torch.device(device))
+
+saved_config = transformer_ckpt.get("config", {})
+transformer_params = saved_config.get("transformer_params", {})
+transformer_model = TransformerForecast(**transformer_params)
+
+transformer_model.load_state_dict(transformer_ckpt["model_state_dict"])

@@ -119,6 +119,8 @@ outputs/<timestamp>/
 │   ├── 20260314_231109
 │   └── log.txt
 ├── notebooks
+│   ├── 1-data_eda.ipynb
+│   └── 2-data_process.ipynb
 └── README.md
 ```
 
