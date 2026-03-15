@@ -82,10 +82,10 @@ Final evaluation is reported in the original price space.
 
 
 Prediction curve:
-![Prediction Plot](outputs/20260314_231109/figures/AAPL_predictions.png)
+![Prediction Plot](outputs/20260315_180055/figures/AAPL_predictions.png)
 
 Training and validation loss:
-![Training and validation loss](outputs/20260314_231109/figures/AAPL_lstm_transformer_loss.png)
+![Training and validation loss](outputs/20260315_180055/figures/AAPL_lstm_transformer_loss.png)
 
 
 Output results are saved under:
