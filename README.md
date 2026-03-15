@@ -1,6 +1,6 @@
-### Stock time series prediction with baselines, LSTM, and Transformer
+## Stock time series prediction with baselines, LSTM, and Transformer
 
-#### Overview
+### Overview
 This project implements a time-series forecasting pipeline for stock price prediction using LSTM and Transformer, and benchmarks against traditional statistical baselines (Naive baseline, Moving average baseline, Linear regression baseline). 
 
 The current implementation (v1.0) serves as a foundational time series forecasting framework covering data preprocessing, dataset construction, model training, and evaluation. 
@@ -35,16 +35,16 @@ Future work to be done: rigorous ablation study, predict on return or direction.
 
 
 
-#### Task description
+### Task description
 Given daily information up to day t (e.g., previous 60 trading days), predict the target at day t+1.
 
-#### Data and Features
+### Data and Features
 - Ticker: AAPL
 - Period: 2015-01-01 to 2025-01-01
 - Features: Open, High, Low, Close, Volume, return, log_return
 - Current target: Close *(will be changed to `return` or `direction`)*
 
-#### Exploratory Data Analysis 
+### Exploratory Data Analysis 
 An exploratory data analysis notebook is included to inspect the data distribution and time-series characteristics, including:
 - Time series plots for Close/Volume/Return
 - Distribution of Return and Log Return
@@ -53,7 +53,7 @@ An exploratory data analysis notebook is included to inspect the data distributi
 
 ---
 
-#### Pipeline
+### Pipeline
 1. Load raw stock data for the selected ticker and date range 
 2. Engineer causal features (return, log_return)
 3. Split data chronologically into train / validation / test sets
@@ -66,7 +66,7 @@ The best model checkpoints are saved based on the lowest validation loss during 
 
 ---
 
-#### Metrics and Visualization
+### Metrics and Visualization
 Training is performed in the scaled space using MSE loss.
 Final evaluation is reported in the original price space.
 
@@ -94,7 +94,7 @@ Output results are saved under:
 outputs/<timestamp>/
 ```
 
-#### Repo structure
+### Repo structure
 ```
 ├── config.json
 ├── data
