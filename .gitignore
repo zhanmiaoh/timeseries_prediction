@@ -13,6 +13,7 @@ data/processed/
 
 notebooks/0-repo.ipynb
 notebooks/all_code.py
+notebooks/demo4-LSTM_example.ipynb
 notebooks/demo4.1-supp_notes.ipynb
 notebooks/demo4.2-practice.ipynb
 notebooks/demo4.2-practice.pdf
