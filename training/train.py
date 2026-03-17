@@ -24,6 +24,7 @@ def train_model(model, train_loader, val_loader, optimizer, criterion, device, e
     model.to(device)
 
     best_val_loss = float('inf')
+    # best_val_loss = 0.1
     patience = 5
     patience_counter = 0
     history = {'epoch': [], 'train_loss': [],'val_loss': []}

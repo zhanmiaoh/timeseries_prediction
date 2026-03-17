@@ -33,6 +33,7 @@ def save_results(run_dir, config, timeseries, y_test_raw, prediction_dict_raw, l
     # y_test_raw, prediction_dict_raw 的summary metrics
     summary_rows = []
     for label, preds in prediction_dict_raw.items():
+        sign_acc = (np.sign(y_test_raw) == np.sign(preds)).mean() * 100
         summary_rows.append({
             "run_id": run_id,
             "ticker": config.get("ticker", "Unknown"),
@@ -45,6 +46,7 @@ def save_results(run_dir, config, timeseries, y_test_raw, prediction_dict_raw, l
             "mae_raw": mae(y_test_raw, preds),
             "rmse_raw": rmse(y_test_raw, preds),
             "mape_raw": mape(y_test_raw, preds),
+            "directional_acc": sign_acc
         })
 
     summary_df = pd.DataFrame(summary_rows)

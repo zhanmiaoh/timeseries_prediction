@@ -12,12 +12,13 @@ from models.transformer import TransformerForecast
 from training.train import train_model, predict_model
 
 from evaluation.metrics import mae, rmse, mape
-from evaluation.plotting import data_prep_plot, plot_predictions, plot_loss_subplots
+from evaluation.plotting import data_prep_plot, plot_predictions, plot_loss_subplots, return_convert_close_plot
 from evaluation.save_results import save_results
 
 from datetime import datetime
 import sys
 import os
+import argparse, json
 
 
 def main():
@@ -25,45 +26,59 @@ def main():
     # log_file = open("outputs/log.txt", "a")
     # sys.stdout = log_file
 
-    TICKER = "AAPL"
-    START_DATE = "2015-01-01"
-    END_DATE = "2025-01-01"
-    TRAIN_END = "2020-12-31"
-    VAL_END = "2022-12-31"
-    SEQ_LENGTH = 60
-    HORIZON = 1
-    BATCH_SIZE = 64
-    EPOCHS = 20
-    LR = 1e-3
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=str, default="configs/close_full_seq60_h1.json")
+    args = parser.parse_args()
+
+    with open(args.config, "r", encoding="utf-8") as f:
+        cfg = json.load(f)
+
+    EXP_NAME   = cfg["exp_name"]
+
+    TICKER     = cfg["ticker"]
+    START_DATE = cfg["start_date"]
+    END_DATE   = cfg["end_date"]
+    TRAIN_END  = cfg["train_end"]
+    VAL_END    = cfg["val_end"]
+    SEQ_LENGTH = cfg["seq_length"]
+    HORIZON    = cfg["horizon"]
+    BATCH_SIZE = cfg["batch_size"]
+    EPOCHS     = cfg["epochs"]
+    LR         = cfg["lr"]
+    
+    # original_features = ['Open', 'High', 'Low', 'Close', 'Volume']
+    # new_features = ["return", "log_return"]
+    # features = original_features + new_features
+    adjust   = cfg["adjust"]
+    features   = cfg["features"]
+    target     = cfg["target"]
+    seed       = cfg["seed"]
+
+    lstm_params = cfg["lstm_params"]
+    transformer_params = cfg["transformer_params"]
+
 
     # Device setup
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"[{datetime.now().strftime('%Y%m%d_%H%M%S')}]" ,f"\nUsing device: {device}\n")
+    print(f"[{datetime.now().strftime('%Y%m%d_%H%M')}]" ,f"\nUsing device: {device}\n")
 
     # Set seed
-    seed = 27
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed) if torch.cuda.is_available() else None
 
 
     # load data
-    df = load_stock_data(TICKER, START_DATE, END_DATE)
+    df = load_stock_data(TICKER, START_DATE, END_DATE, adjust=adjust)
     print("Raw data shape:", df.shape)
 
-    # define features and target
-    # original_cols = df.columns.tolist() 
-    original_features = ['Open', 'High', 'Low', 'Close', 'Volume']
-    new_features = ["return", "log_return"]
-    features = original_features + new_features
-    target = "Close"
     target_index = features.index(target)
     print("\nFeatures:", features)
-    print("Target:", target, f"Target index in features: {target_index}")
+    print("Target:", target, f", Target index in features: {target_index}")
     # print(f"target index in features: {target_index}")
 
     # engineer features
-    df = engineer_features(df, new_features)
+    df = engineer_features(df, new_features=["return", "log_return"])
 
     print("\nAfter engineering features:")
     print(df.shape)
@@ -110,22 +125,15 @@ def main():
 
 
     print("\n---Training LSTM model...---")
-    # create model
-    lstm_params = {
-        "num_features": len(features), 
-        "hidden_size": 64, 
-        "num_layers": 2, 
-        "dropout": 0.2, 
-        "horizon": HORIZON
-    }
+    # create model, model params can be modified in config file without changing code here
+    # lstm_params = {
+    #     "num_features": len(features), 
+    #     "hidden_size": 64, 
+    #     "num_layers": 2, 
+    #     "dropout": 0.2, 
+    #     "horizon": HORIZON
+    # }
     lstm_model = LSTMModel(**lstm_params)
-    # lstm_model = LSTMModel(
-    #     num_features=len(features), 
-    #     hidden_size=64, 
-    #     num_layers=2, 
-    #     dropout=0.2, 
-    #     horizon=HORIZON
-    # )
 
     # create optimizer and loss function
     lstm_optimizer = torch.optim.Adam(lstm_model.parameters(), lr=LR)
@@ -141,23 +149,15 @@ def main():
 
     print("\n---Training Transformer model...---")
     # create model
-    transformer_params = {
-        "num_features": len(features), 
-        "d_model": 64, 
-        "nhead": 4, 
-        "num_layers": 2, 
-        "dropout": 0.1, 
-        "horizon": HORIZON
-    }
+    # transformer_params = {
+    #     "num_features": len(features), 
+    #     "d_model": 64, 
+    #     "nhead": 4, 
+    #     "num_layers": 2, 
+    #     "dropout": 0.1, 
+    #     "horizon": HORIZON
+    # }
     transformer_model = TransformerForecast(**transformer_params)
-    # transformer_model = TransformerForecast(
-    #     num_features=len(features), 
-    #     d_model=64, 
-    #     nhead=4, 
-    #     num_layers=2, 
-    #     dropout=0.1, 
-    #     horizon=HORIZON
-    # )
 
     # create optimizer and criterion
     transformer_optimizer = torch.optim.Adam(transformer_model.parameters(), lr=LR)
@@ -183,43 +183,47 @@ def main():
 
 
     
-    config = {
-        "ticker": TICKER,
-        "start_date": START_DATE,
-        "end_date": END_DATE,
-        "train_end": TRAIN_END,
-        "val_end": VAL_END,
-        "seq_length": SEQ_LENGTH,
-        "horizon": HORIZON,
-        "batch_size": BATCH_SIZE,
-        "lr": LR,
-        "features": features,
-        "target": target,
-        "seed": seed,
-            # model params
-        "lstm_params": lstm_params,
-        "transformer_params": transformer_params,
-    }
+    # config = {
+    #     "ticker": TICKER,
+    #     "start_date": START_DATE,
+    #     "end_date": END_DATE,
+    #     "train_end": TRAIN_END,
+    #     "val_end": VAL_END,
+    #     "seq_length": SEQ_LENGTH,
+    #     "horizon": HORIZON,
+    #     "batch_size": BATCH_SIZE,
+    #     "lr": LR,
+    #     "features": features,
+    #     "target": target,
+    #     "seed": seed,
+    #         # model params
+    #     "lstm_params": lstm_params,
+    #     "transformer_params": transformer_params,
+    # }
 
 
-    # save and plot
-    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_dir = os.path.join("outputs", run_id)
+    # SAVE and PLOT 
+    run_dir = os.path.join("outputs", EXP_NAME, datetime.now().strftime("%Y%m%d_%H%M"))
     os.makedirs(run_dir, exist_ok=True)
     os.makedirs(os.path.join(run_dir, "figures"), exist_ok=True)
 
-    # plot, and save figure
-    timeseries = test_df_raw[target].values.reshape(-1,1) # (num_dates, horizon=1)
-    print(f"Total test dates: {timeseries.shape}, Seq_length={SEQ_LENGTH}, Horizon={HORIZON}, Pred dates: {ma_preds.shape}")
-    plot_predictions(timeseries, prediction_dict_raw, config, 
-                     save_path=f"{run_dir}/figures/{TICKER}_predictions.png")
-    
+    # plot loss
     plot_loss_subplots(lstm_history, transformer_history, 
                        save_path=f"{run_dir}/figures/{TICKER}_lstm_transformer_loss.png")
+
+    # plot the target predictions
+    timeseries = test_df_raw[target].values.reshape(-1,1) # (num_dates, horizon=1)
+    print(f"Total test dates: {timeseries.shape}, Seq_length={SEQ_LENGTH}, Horizon={HORIZON}, Pred dates: {ma_preds.shape}")
+    plot_predictions(timeseries, prediction_dict_raw, cfg, 
+                     save_path=f"{run_dir}/figures/{TICKER}_predictions.png")
     
+    # convert pred return to close, and plot pred close and true close
+    if target == "return":
+        return_convert_close_plot(test_df_raw, y_test_raw, prediction_dict_raw, cfg, 
+                                  save_path=f"{run_dir}/figures/{TICKER}_pred_close_price.png")    
     
     # save outputs: metrics, history, predictions, checkpoints, scalers
-    summary_df = save_results(run_dir, config, timeseries, y_test_raw, prediction_dict_raw, 
+    summary_df = save_results(run_dir, cfg, timeseries, y_test_raw, prediction_dict_raw, 
                               lstm_model, lstm_history, lstm_optimizer, 
                               transformer_model, transformer_history, transformer_optimizer, 
                               scaler, target_scaler)
@@ -235,11 +239,14 @@ def main():
     
     print("\n---Final Results Summary (on raw data scale)---")
     print("=" * 65)
-    print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'MAPE':<15}")
+    print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'Direction acc':<15}")
     print("-" * 65)
     for index, row in summary_df.iterrows():
-        mape = row['mape_raw']
-        print(f"{row['model']:<20} {row['mae_raw']:<15.4f} {row['rmse_raw']:<15.4f} {f'{mape:.4f}%':<15}")
+        if target in {"return", "log_return"}:
+            print(f"{row['model']:<20} {row['mae_raw']:<15.4f} {row['rmse_raw']:<15.4f} {row['directional_acc']:<15.4f}")
+        elif target in {"Close", "Open", "High", "Low"}:
+            mape_value = row['mape_raw']
+            print(f"{row['model']:<20} {row['mae_raw']:<15.4f} {row['rmse_raw']:<15.4f} {f'{mape_value:.4f}%':<15}")
     print("=" * 65)
 
     # log_file.close()

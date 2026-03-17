@@ -2,7 +2,7 @@ import akshare as ak
 import pandas as pd
 import numpy as np
 
-def load_stock_data(ticker, start_date, end_date):
+def load_stock_data(ticker, start_date, end_date, adjust=""):
     """
     load data from akshare, reframing,
     and return a pandas DataFrame with columns: ['date', 'open', 'high', 'low', 'close', 'volume']
@@ -10,7 +10,7 @@ def load_stock_data(ticker, start_date, end_date):
 
     # 1. 从 AkShare 获取数据 (adjust="" 对应 yfinance 的 auto_adjust=False，即获取不复权的原始数据)
     try: 
-        df = ak.stock_us_daily(symbol=ticker, adjust="")
+        df = ak.stock_us_daily(symbol=ticker, adjust=adjust)  # 获取前复权数据，类似于 yfinance 的 auto_adjust=True
     except Exception as e:
         raise RuntimeError(f"Failed to download data for {ticker} using akshare: {e}")
 

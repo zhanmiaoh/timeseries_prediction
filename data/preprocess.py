@@ -63,7 +63,7 @@ def scale_features(train_df, val_df, test_df, features, target):
 
     train_df_scaled = train_df.copy()
     train_df_scaled[features] = scaler.fit_transform(train_df[features]) # (num_samples, num_features)
-    train_df_scaled[target] = target_scaler.fit_transform(train_df[[target]])
+    train_df_scaled[target] = target_scaler.fit_transform(train_df[[target]]) # (num_samples, 1)
 
     val_df_scaled = val_df.copy()
     val_df_scaled[features] = scaler.transform(val_df[features])

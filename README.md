@@ -1,13 +1,13 @@
-## Stock time series prediction with baselines, LSTM, and Transformer
+## Financial time-series prediction with baselines, LSTM, and Transformer
 
 ### Overview
-This project implements a time-series forecasting pipeline for stock price prediction using LSTM and Transformer, and benchmarks against traditional statistical baselines (Naive baseline, Moving average baseline, Linear regression baseline). 
+This project implements a time-series forecasting framework for stock price prediction using LSTM and Transformer, and benchmarks against traditional statistical baselines (Naive baseline, Moving average baseline, and Linear regression baseline). 
 
-The current implementation (v1.0) serves as a foundational time series forecasting framework covering data preprocessing, dataset construction, model training, and evaluation. 
+The current implementation (v1.0) serves as a foundational time-series ML engineering practices covering data preprocessing, dataset construction, model training, and evaluation. Some necessary follow-up steps still need to be added (See [Roadmap & Future work](#roadmap--future-work)). 
 
-This project is currently a forecasting benchmark, not a production trading system. Forecasting accuracy does not directly imply trading profitability. 
+<!-- This project is currently a forecasting benchmark, not a production trading system. Forecasting accuracy does not directly imply trading profitability.  -->
 
-(A related demo for time series prediction: https://github.com/zhanmiaoh/demo_timeseries_prediction)
+(A related demo of time series prediction: https://github.com/zhanmiaoh/demo_timeseries_prediction)
 <!-- 
 Future work to be done: rigorous ablation study, predict on return or direction. 
 -->

@@ -36,6 +36,7 @@ def plot_loss_subplots(lstm_history, transformer_history, save_path=None):
     axes[1].set_title("Transformer Training and Validation Loss")
     axes[1].set_xlabel("Epoch")
     axes[1].set_ylabel("Loss")
+    axes[1].set_yticks(axes[0].get_yticks())  # Ensure y-ticks are the same for both subplots
     axes[1].legend()
 
     if save_path is not None:
@@ -95,19 +96,23 @@ def plot_predictions(timeseries, prediction_dict, config, save_path=None):
     start_date = config.get("start_date", "Unknown")
     end_date = config.get("end_date", "Unknown")
 
+    target_name = config["target"]
+
     plt.figure(figsize=(12, 4))
     # true:
-    plt.plot(timeseries, label='True Close Price', color='black', linewidth=1.5)
+    plt.plot(timeseries, label=f'True {target_name}', color='black', linewidth=1.5)
     # prediction:
     for label, preds in prediction_dict.items():
         test_plot = data_prep_plot(timeseries, preds, seq_length)
         plt.plot(test_plot, label=label, alpha=0.8) 
 
-
     plt.legend()
-    plt.title(f"{ticker} Price from {start_date} to {end_date} (Test set)")
+    plt.title(f"{ticker} {target_name} from {start_date} to {end_date} (Test set)")
     plt.xlabel("Date")
-    plt.ylabel("Close value")
+    plt.ylabel(f"{target_name}")
+
+    if target_name in {"return", "log_return"}:
+        plt.axhline(0.0, linestyle="--", alpha=0.5)
 
     if save_path is not None:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
@@ -115,3 +120,32 @@ def plot_predictions(timeseries, prediction_dict, config, save_path=None):
     plt.tight_layout()
     plt.show()
 
+
+def return_convert_close_plot(test_df_raw, y_test_raw, prediction_dict_raw, config, save_path=None):
+
+    ticker = config.get("ticker", "Unknown")
+    seq_length = config.get("seq_length", None)
+
+    plt.figure(figsize=(12, 4))
+    # true:
+    close_all = test_df_raw["Close"].values.reshape(-1, 1)
+    true_close = close_all[seq_length :]          # actual C_{t+1}
+    plt.plot(true_close, label="True Close", color="black")
+
+    for model in ["Linear Regression" ,"LSTM", "Transformer"]:
+        # pred:
+        pred_ret = prediction_dict_raw[model]   # raw predicted return
+        true_ret = y_test_raw                    # raw true return
+
+        prev_close = close_all[seq_length - 1 : -1]   # C_t
+        pred_close = prev_close * (1 + pred_ret)      # C_{t+1}^pred = C_t * (1+r_{t+1}^pred)
+        plt.plot(pred_close, label=f"Pred Close from Pred Return: {model}", alpha=0.8)
+
+    plt.legend()
+    plt.title(f"{ticker} Close price converted from predicted returns")
+
+    if save_path is not None:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+
+    plt.tight_layout()
+    plt.show()
