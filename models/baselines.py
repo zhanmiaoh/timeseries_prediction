@@ -1,7 +1,7 @@
 from sklearn.linear_model import LinearRegression
 import numpy as np
 
-def naive_forecast(X, target_index):
+def naive_forecast(X, target, target_index):
     """
     Use the target (eg, close) price from the last timestep
     Args:
@@ -12,7 +12,12 @@ def naive_forecast(X, target_index):
         (the shape is to match with y_test)
     """   
 
-    return X[:, -1, target_index].reshape(-1, 1)
+    if target in {"Close"}:
+        baseline = X[:, -1, target_index].reshape(-1, 1)
+    elif target in {"return", "log_return"}:
+        baseline = np.zeros((X.shape[0], 1)) # shape (num_samples, 1)
+
+    return baseline
 
 
 def moving_average_forecast(X, target_index, window=5):

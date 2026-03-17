@@ -114,7 +114,7 @@ def main():
 
 
     # evaluate baseline models
-    naive_preds = naive_forecast(X_test, target_index)
+    naive_preds = naive_forecast(X_test, target, target_index)
     ma_preds = moving_average_forecast(X_test, target_index, window=5)
     lr_preds = linear_regression_forecast(X_train, y_train, X_test)
 
@@ -228,14 +228,6 @@ def main():
                               transformer_model, transformer_history, transformer_optimizer, 
                               scaler, target_scaler)
 
-    
-    # print("\n---Final Results Summary (on raw data scale)---")
-    # print("=" * 65)
-    # print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'MAPE':<15}")
-    # print("-" * 65)
-    # for label, preds in prediction_dict_raw.items():
-    #     print(f"{label:<20} {mae(y_test_raw, preds):<15.4f} {rmse(y_test_raw, preds):<15.4f} {f'{mape(y_test_raw, preds):.4f}%':<15}")
-    # print("=" * 65)
     
     print("\n---Final Results Summary (on raw data scale)---")
     print("=" * 65)
