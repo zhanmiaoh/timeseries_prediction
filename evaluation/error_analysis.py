@@ -144,7 +144,9 @@ import json
 if __name__ == "__main__":
 
     analysis_model = "Naive Baseline"
-    run_dir = "outputs/20260315_180055"
+    exp_name = "close_full_seq60_h1"
+    run_id = "20260315_180055"
+    run_dir = f"outputs/{exp_name}/{run_id}"
 
     data = np.load(f"{run_dir}/predictions.npz", allow_pickle=True)
     timeseries = data["all_test_timeseries"]

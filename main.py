@@ -27,7 +27,7 @@ def main():
     # sys.stdout = log_file
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", type=str, default="configs/close_full_seq60_h1.json")
+    parser.add_argument("--config", type=str, default="configs/close_noret_seq60_h1.json")
     args = parser.parse_args()
 
     with open(args.config, "r", encoding="utf-8") as f:
@@ -46,11 +46,12 @@ def main():
     EPOCHS     = cfg["epochs"]
     LR         = cfg["lr"]
     
-    # original_features = ['Open', 'High', 'Low', 'Close', 'Volume']
     # new_features = ["return", "log_return"]
     # features = original_features + new_features
     adjust   = cfg["adjust"]
     features   = cfg["features"]
+    original_features = ['Open', 'High', 'Low', 'Close', 'Volume']
+    new_features = [f for f in features if f not in original_features]
     target     = cfg["target"]
     seed       = cfg["seed"]
 
@@ -78,7 +79,7 @@ def main():
     # print(f"target index in features: {target_index}")
 
     # engineer features
-    df = engineer_features(df, new_features=["return", "log_return"])
+    df = engineer_features(df, new_features=new_features)
 
     print("\nAfter engineering features:")
     print(df.shape)
@@ -231,14 +232,15 @@ def main():
     
     print("\n---Final Results Summary (on raw data scale)---")
     print("=" * 65)
-    for index, row in summary_df.iterrows():
-        if target in {"return", "log_return"}:
-            print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'Direction acc':<15}")
-            print("-" * 65)
+    if target in {"return", "log_return"}:
+        print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'Direction acc':<15}")
+        print("-" * 65)
+        for index, row in summary_df.iterrows():
             print(f"{row['model']:<20} {row['mae_raw']:<15.4f} {row['rmse_raw']:<15.4f} {row['directional_acc']:<15.4f}")
-        elif target in {"Close", "Open", "High", "Low"}:
-            print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'MAPE':<15}")
-            print("-" * 65)
+    elif target in {"Close", "Open", "High", "Low"}:
+        print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'MAPE':<15}")
+        print("-" * 65)
+        for index, row in summary_df.iterrows():
             mape_value = row['mape_raw']
             print(f"{row['model']:<20} {row['mae_raw']:<15.4f} {row['rmse_raw']:<15.4f} {f'{mape_value:.4f}%':<15}")
     print("=" * 65)

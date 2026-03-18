@@ -11,8 +11,9 @@ import joblib
 # 4) checkpoints
 # 5) scalers
 
-
-run_dir = "outputs/20260315_180055"
+exp_name = "close_full_seq60_h1"
+run_id = "20260315_180055"
+run_dir = f"outputs/{exp_name}/{run_id}"
 
 # config
 config_path = f"{run_dir}/config.json"

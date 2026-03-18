@@ -1,0 +1,39 @@
+{
+    "exp_name": "close_ohlcvonly_seq60_h1",
+    "adjust": "",
+
+    "ticker": "AAPL",
+    "start_date": "2015-01-01",
+    "end_date": "2025-01-01",
+    "train_end": "2020-12-31",
+    "val_end": "2022-12-31",
+    "seq_length": 60,
+    "horizon": 1,
+    "batch_size": 64,
+    "epochs": 20,
+    "lr": 0.001,
+    "features": [
+        "Open",
+        "High",
+        "Low",
+        "Close",
+        "Volume"
+    ],
+    "target": "Close",
+    "seed": 27,
+    "lstm_params": {
+        "num_features": 5,
+        "hidden_size": 64,
+        "num_layers": 2,
+        "dropout": 0.2,
+        "horizon": 1
+    },
+    "transformer_params": {
+        "num_features": 5,
+        "d_model": 64,
+        "nhead": 4,
+        "num_layers": 2,
+        "dropout": 0.1,
+        "horizon": 1
+    }
+}
