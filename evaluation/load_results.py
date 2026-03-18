@@ -12,7 +12,7 @@ import joblib
 # 5) scalers
 
 
-run_dir = "outputs/20260314_002451"
+run_dir = "outputs/20260315_180055"
 
 # config
 config_path = f"{run_dir}/config.json"

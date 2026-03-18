@@ -88,7 +88,7 @@ def data_prep_plot(timeseries, preds, seq_length):
 # timeseries: (dates, 1) 
 
 
-def plot_predictions(timeseries, prediction_dict, config, save_path=None):
+def plot_predictions(timeseries, prediction_dict, config, save_path=None, topk_idxs=None):
 
     # 使用 .get() 的好处是，万一字典里漏写了某个键，它会返回默认值而不会报错
     seq_length = config.get("seq_length", None)
@@ -101,6 +101,10 @@ def plot_predictions(timeseries, prediction_dict, config, save_path=None):
     plt.figure(figsize=(12, 4))
     # true:
     plt.plot(timeseries, label=f'True {target_name}', color='black', linewidth=1.5)
+    # top-k error:
+    if topk_idxs is not None:
+        for idx in topk_idxs:
+            plt.axvline(idx, color='red', linestyle='--', alpha=0.5)#, label=f"Top-{topk_idxs.index(idx)+1} Error idx: {idx}" if topk_idxs.index(idx) < 1 else None)
     # prediction:
     for label, preds in prediction_dict.items():
         test_plot = data_prep_plot(timeseries, preds, seq_length)
@@ -119,6 +123,7 @@ def plot_predictions(timeseries, prediction_dict, config, save_path=None):
 
     plt.tight_layout()
     plt.show()
+
 
 
 def return_convert_close_plot(test_df_raw, y_test_raw, prediction_dict_raw, config, save_path=None):

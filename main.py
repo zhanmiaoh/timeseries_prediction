@@ -231,12 +231,14 @@ def main():
     
     print("\n---Final Results Summary (on raw data scale)---")
     print("=" * 65)
-    print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'Direction acc':<15}")
-    print("-" * 65)
     for index, row in summary_df.iterrows():
         if target in {"return", "log_return"}:
+            print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'Direction acc':<15}")
+            print("-" * 65)
             print(f"{row['model']:<20} {row['mae_raw']:<15.4f} {row['rmse_raw']:<15.4f} {row['directional_acc']:<15.4f}")
         elif target in {"Close", "Open", "High", "Low"}:
+            print(f"{'Model':<20} {'MAE':<15} {'RMSE':<15} {'MAPE':<15}")
+            print("-" * 65)
             mape_value = row['mape_raw']
             print(f"{row['model']:<20} {row['mae_raw']:<15.4f} {row['rmse_raw']:<15.4f} {f'{mape_value:.4f}%':<15}")
     print("=" * 65)
