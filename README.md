@@ -3,7 +3,7 @@
 ### Overview
 This project implements a time-series forecasting framework for stock price prediction using LSTM and Transformer, and benchmarks against traditional statistical baselines (Naive baseline, Moving average baseline, and Linear regression baseline). 
 
-The current implementation (v1.0) serves as a foundational time-series ML engineering practices covering data preprocessing, dataset construction, model training, and evaluation. Some necessary follow-up steps still need to be added (See [Roadmap & Future work](#roadmap--future-work)). 
+The current implementation serves as a foundational time-series ML engineering practices covering data preprocessing, dataset construction, model training, and evaluation. Error analysis and abalation experiments are studied as well to understand about the model.
 
 <!-- This project is currently a forecasting benchmark, not a production trading system. Forecasting accuracy does not directly imply trading profitability.  -->
 
@@ -83,18 +83,50 @@ Final evaluation is reported in the original price space.
 **Note**: The strong performance of naive baseline is due to the high short-term continuity and strong autocorrelation in absolute stock prices ($Y_t\approx Y_{t-1}$). Replacing the prediction target to returns will reduce this persistence effect and provide a more informative setting. 
 
 
-Prediction curve:
-![Prediction Plot](outputs/20260315_180055/figures/AAPL_predictions.png)
+Prediction curve, where the dashed lines correspond to top-5 error timepoints of LSTM predictions:
+![Prediction Plot](outputs/20260315_180055/figures/AAPL_predictions_with_LSTM_topk.png)
 
 Training and validation loss:
 ![Training and validation loss](outputs/20260315_180055/figures/AAPL_lstm_transformer_loss.png)
 
 
-Output results are saved under:
+---
 
-```bash
-outputs/<timestamp>/
-```
+### Error analysis & Ablation study
+Error analysis of (1) residual histogram and (2) top-K error interval have been down. The high prediction errors are related to the high-volatility. 
+<!-- 1. Residual histogram
+2. top-K error interval
+3. High/low volatility  -->
+<table>
+  <tr>
+    <td><img src="evaluation/feature_ablation_compact.png" width="100%"></td>
+    <td><img src="evaluation/seq_length_ablation_compact.png" width="100%"></td>
+  </tr>
+</table>
+
+- Return-style features are more informative than raw OHLCV alone.
+LSTM performs best with cleaner inputs (one of return or log return);
+- Transformer is more sensitive to input feature choice. 
+- Longer context is not always better: LSTM prefers 20 days, Transformer around 60.
+- Even the best learned model does not beat the naïve last-close baseline. 
+
+
+---
+
+### Roadmap & Future work
+- For the target of `Return`/`Log Return`/`Direction`, input featrures and practical strategies need to be supplemented, otherwise it is hard for the deep model to learn effective information.
+- Implement binary classification of price directions as a startpoint and a simpler alternative to continuous forecasting.
+<!-- - **Ablation** studies on feature sets and lookback windows. 
+    - Features OHLCV only vs OHLCV + return/log_return
+    - Evaluate the impact of lookback window (`seq_length=20/60/120`)
+    - Evaluate the impact of hidden layer dimension in LSTM (`hidden_size=32/64/128`), in Transformer (`d_model=32/64`, `dim_feedforward=128/256/2048`);  -->
+<!-- - Error analysis: Perform residual-based error analysis across different volatility regimes. -->
+
+- Implement backtesting to assess whether predictive signals translate into trading performance.
+- Add walk-forward evaluation instead of a single fixed chronological split.
+
+
+---
 
 ### Repo structure
 ```
@@ -131,33 +163,16 @@ How to run
 python main.py
 ```
 
----
+Output results are saved under:
 
-### Roadmap & Future work
-- **Target:** Modify the forecasting target from `Close` to `Return`/`Log Return` to avoid the effect of increasing price trend (on forward-adjusted prices) 
-- Implement binary classification models (predicting price direction) as an alternative to continuous forecasting 
-- **Ablation** studies on feature sets and lookback windows. 
-    - Features OHLCV only vs OHLCV + return/log_return
-    - Evaluate the impact of lookback window (`seq_length=20/60/120`)
-    - Evaluate the impact of hidden layer dimension in LSTM (`hidden_size=32/64/128`), in Transformer (`d_model=32/64`, `dim_feedforward=128/256/2048`); 
-- Error analysis: Perform residual-based error analysis across different volatility regimes.
-
-- Implement simple backtesting to assess whether predictive signals translate into trading performance.
-- Add walk-forward evaluation instead of a single fixed chronological split.
+```bash
+outputs/<timestamp>/
+```
 
 
 <!-- ### Ackownledgement 
 This project is based on reproduction of ..., with modifications in experiment organization, logging and evaluation. -->
 
----
-
-<!-- 
-#### Ablation study
 
 
----
 
-#### Error analysis -->
-<!-- 1. Residual histogram
-2. top-K error interval
-3. High/low volatility  -->
